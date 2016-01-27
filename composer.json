@@ -1,0 +1,22 @@
+{
+    "name": "phpoxford/spires-irc",
+    "description": "IRC client for Spires bot and mock server for testing",
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.1"
+    },
+    "authors": [
+        {
+            "name": "Gareth Ellis",
+            "email": "garethellis@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "PHPOxford\\Spires\\Irc\\": "src/",
+            "PHPOxford\\Spires\\Irc\\Test\\": "test/"
+        }
+    }
+}
