@@ -50,7 +50,8 @@ class Parser
 
         // =  *14( SPACE middle ) [ SPACE ":" trailing ]
         // =/ 14( SPACE middle ) [ SPACE [ ":" ] trailing ]
-        $params = "(?:(?:$space$middle){0,14}(?:$space$colon$trailing)?|(?:$space$middle){14}(?:$space(?:$colon)?$trailing)?)";
+        $params = "(?:(?:$space$middle){0,14}(?:$space$colon$trailing)?" .
+            "|(?:$space$middle){14}(?:$space(?:$colon)?$trailing)?)";
 
         // =  ( letter / digit ) *( letter / digit / "-" ) *( letter / digit )
         $shortname = "(?:[$letter$digit][$letter$digit$dash]*[$letter$digit]*)";
@@ -81,7 +82,8 @@ class Parser
         $user = "(?:[\x01-\x09|\x0B-\x0C|\x0E-\x1F|\x21-\x3F|\x41-\xFF]+)";
 
         // =  servername / ( nickname [ [ "!" user ] "@" host ] )
-        $prefix = "(?:(?P<servername>$servername)|(?:(?P<nickname>$nickname)(?:$bang(?P<username>$user))?(?:$at(?P<hostname>$host))?))";
+        $prefix = "(?:(?P<servername>$servername)" .
+            "|(?:(?P<nickname>$nickname)(?:$bang(?P<username>$user))?(?:$at(?P<hostname>$host))?))";
 
         // =  [ ":" prefix SPACE ] command [ params ] crlf
         $message = "(?P<prefix>$colon$prefix$space)?(?P<command>$command)(?P<params>$params)?$crlf";
