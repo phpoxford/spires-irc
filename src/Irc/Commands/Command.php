@@ -9,12 +9,12 @@ class Command implements CommandInterface
     /**
      * @var string
      */
-    private $command;
+    protected $command;
 
     /**
      * @var string
      */
-    private $params;
+    protected $params;
 
     public function __construct(string $command, string $params = null)
     {
