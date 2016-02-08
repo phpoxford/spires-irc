@@ -23,6 +23,18 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     public function dataMessages()
     {
         return [
+            'Notice' => [
+                ":sendak.freenode.net NOTICE * :*** Found your hostname\r\n",
+                [
+                    'prefix' => ':sendak.freenode.net',
+                    'nickname' => '',
+                    'username' => '',
+                    'hostname' => '',
+                    'servername' => 'sendak.freenode.net',
+                    'command' => 'NOTICE',
+                    'params' => '* :*** Found your hostname',
+                ]
+            ],
             'Command with no params' => [
                 "QUIT\r\n",
                 [

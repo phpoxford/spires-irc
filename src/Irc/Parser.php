@@ -76,7 +76,11 @@ class Parser
         $host = "(?:$hostname|$hostaddr)";
 
         // =  ( letter / special ) *8( letter / digit / special / "-" )
-        $nickname = "(?:[$letter$special][$letter$digit$special$dash]{0,8})";
+        //  * While the maximum length is limited to nine characters, clients
+        //  * SHOULD accept longer strings as they may become used in future
+        //  * evolutions of the protocol.
+        //  * https://tools.ietf.org/html/rfc2812#section-1.2.1
+        $nickname = "(?:[$letter$special][$letter$digit$special$dash]*)";
 
         // =  1*( %x01-09 / %x0B-0C / %x0E-1F / %x21-3F / %x41-FF )   ; any octet except NUL, CR, LF, " " and "@"
         $user = "(?:[\x01-\x09|\x0B-\x0C|\x0E-\x1F|\x21-\x3F|\x41-\xFF]+)";
@@ -101,7 +105,7 @@ class Parser
             'username' => $matches['username'] ?? '',
             'hostname' => $matches['hostname'] ?? '',
             'servername' => $matches['servername'] ?? '',
-            'command' => $matches['command'],
+            'command' => $matches['command'] ?? '',
             'params' => $matches['params'] ?? '',
         ];
     }
