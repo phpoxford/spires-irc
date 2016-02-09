@@ -44,14 +44,12 @@ $client->addAction(function (IrcClient $client, Message $message) {
 // (hi|hello|hey) spires
 $client->addAction(function (IrcClient $client, Message $message) {
     if ($message->command() instanceof Privmsg) {
-
         /** @var Privmsg $command */
         $command = $message->command();
 
         if ($command->hasTarget($client->channel())) {
             if (preg_match('/^(hi|hello|hey) spires$/i', $command->text())) {
-                $response = new Privmsg([$client->channel()], "Hello {$message->prefix()->nickname()}");
-                $client->write($response);
+                $client->channelMessage("Hello {$message->prefix()->nickname()}");
             }
         }
     }
@@ -66,16 +64,10 @@ $client->addAction(function (IrcClient $client, Message $message) {
         if ($command->hasTarget($client->channel())) {
             if (preg_match('/^!spires (?P<match>.+)/i', $command->text(), $matches)) {
                 if (preg_match('/^what time is it\??/i', $matches['match'])) {
-                    $client->write(new Privmsg([$client->channel()], "It's"));
-                    $dancer = '     \o/';
-                    foreach ([1,2,3] as $i) {
-                        usleep(1000000/$i);
-                        $client->write(new Privmsg([$client->channel()], substr($dancer, -1*$i, $i)));
-                        $dancer = $dancer == '     \o/' ? '     /o\\' : '     \o/';
-                    }
-                    ++$i;
-                    usleep(1000000/$i);
-                    $client->write(new Privmsg([$client->channel()], substr($dancer, -1*$i, $i) . " HAMMER TIME!"));
+                    $time = date('H:i');
+                    $client->channelMessage(" \\o/  /       {$time}       \\");
+                    $client->channelMessage("  |   \\ It's hammer time! /");
+                    $client->channelMessage(" / \\");
                 }
             }
         }

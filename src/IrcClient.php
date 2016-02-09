@@ -93,6 +93,11 @@ class IrcClient
         fwrite(STDOUT, $string);
     }
 
+    public function channelMessage(string $message)
+    {
+        $this->write(new Privmsg([$this->channel()], $message));
+    }
+
     public function run()
     {
         $parser = new Parser();
