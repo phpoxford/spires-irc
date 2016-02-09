@@ -4,7 +4,7 @@ namespace PHPOxford\SpiresIrc\Irc\Commands;
 
 use PHPOxford\SpiresIrc\Irc\Message\Command as CommandInterface;
 
-class Command implements CommandInterface
+class Command extends Base implements CommandInterface
 {
     /**
      * @var string
@@ -22,9 +22,9 @@ class Command implements CommandInterface
         $this->params = $params ?: '';
     }
 
-    public function command() : string
+    public static function fromParams(string $params) : self
     {
-        return $this->command;
+        // TODO: Implement fromParams() method.
     }
 
     public function params() : string
@@ -32,8 +32,4 @@ class Command implements CommandInterface
         return $this->params;
     }
 
-    public function raw() : string
-    {
-        return trim($this->command() . ' ' . $this->params());
-    }
 }

@@ -1,5 +1,15 @@
 <?php
 
+use PHPOxford\SpiresIrc\Irc\Commands\Command;
+use PHPOxford\SpiresIrc\Irc\Commands\Ping;
+use PHPOxford\SpiresIrc\Irc\Commands\Pong;
+use PHPOxford\SpiresIrc\Irc\Commands\Privmsg;
+use PHPOxford\SpiresIrc\Irc\Connection;
+use PHPOxford\SpiresIrc\Irc\Message;
+use PHPOxford\SpiresIrc\Irc\Message\Prefix;
+use PHPOxford\SpiresIrc\Irc\User;
+use PHPOxford\SpiresIrc\IrcClient;
+
 require_once 'vendor/autoload.php';
 
 error_reporting(E_ALL);
@@ -7,54 +17,81 @@ error_reporting(E_ALL);
 /* Allow the script to hang around waiting for connections. */
 set_time_limit(0);
 
-/* Turn on implicit output flushing so we see what we're getting
- * as it comes in. */
+/* Turn on implicit output flushing so we see what we're getting as it comes in. */
 ob_implicit_flush();
 
-//$channel = '#phpoxford';
-$channel = '##martinsbottesting';
-$server = 'irc.freenode.com';
-$port = 6667;
-$nickname = 'spires';
-$realname = 'Spires ALPHA';
+$client = new IrcClient(
+    new Connection(
+        '##martinsbottesting',
+        'irc.freenode.com'
+    ),
+    new User(
+        'spires',
+        'spires',
+        'Spires ALPHA'
+    )
+);
 
-
-$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-$isConnected = socket_connect($socket, $server, $port);
-
-socket_write($socket, "NICK {$nickname}\r\n");
-socket_write($socket, "USER {$nickname} {$nickname} {$nickname} :{$realname}\r\n");
-socket_write($socket, "JOIN {$channel}\r\n");
+$client->connect();
 
 $parser = new \PHPOxford\SpiresIrc\Irc\Parser();
 
-while ($raw = socket_read($socket, 2048, PHP_NORMAL_READ)) {
+while ($raw = $client->read()) {
 
     if (!$raw = trim($raw)) {
         continue;
     }
     echo "\n\n";
+    echo "Raw: {$raw}";
+    echo "\n";
     $message = $parser->parse($raw . "\r\n");
     var_export($message);
 
-    if ($message['command'] === 'PING') {
-        $response = "PONG {$message['params']}\r\n";
-        socket_write($socket, $response);
-        echo '[response]: ' . $response;
+    $prefix = new Prefix($message['nickname'], $message['username'], $message['hostname'], $message['servername']);
+
+    switch ($message['command']) {
+        case 'PING':
+            $message = new Message(
+                $prefix,
+                Ping::fromParams($message['params'])
+            );
+            break;
+
+        case 'PRIVMSG':
+            $message = new Message(
+                $prefix,
+                Privmsg::fromParams($message['params'])
+            );
+            break;
+
+        default:
+            $message = new Message(
+                $prefix,
+                new Command($message['command'], $message['params'])
+            );
+    }
+    echo "\n";
+    var_dump($message);
+
+
+    if ($message instanceof Ping) {
+        $response = Pong::fromParams($message['params']);
+        $client->write($response . "\r\n");
+        echo "\n".'[response]: ' . $response;
     }
 
-    if ($message['command'] === 'PRIVMSG') {
-        list($target, $msg) = explode(' :', $message['params'], 2);
+    if ($message instanceof Privmsg) {
+//        list($target, $msg) = explode(' :', $message['params'], 2);
 
-        if ($target === $channel && strpos($msg, "hi spires") === 0) {
-            $response = "PRIVMSG {$channel} :Hello {$message['nickname']}\r\n";
-            socket_write($socket, $response);
-            echo '[response]: ' . $response;
+        if (in_array($client->connection()->channel(), $message->targets()) && strpos($message->text(), "hi spires") === 0) {
+            $response = "PRIVMSG {$client->connection()->channel()} :Hello {$message->prefix()->nickname()}\r\n";
+            $client->write($response);
+            echo "\n".'[response]: ' . $response;
         }
-        if ($target === $channel && strpos($msg, '!spires') !== false) {
-            $response = "PRIVMSG {$channel} :Sorry {$message['nickname']}, I'm stupid and can only say hello :(\r\n";
-            socket_write($socket, $response);
-            echo '[response]: ' . $response;
+        if (in_array($client->connection()->channel(), $message->targets()) && strpos($message->text(), '!spires') !== false) {
+            $response = "PRIVMSG {$client->connection()->channel()} :Sorry {$message->prefix()->nickname()}, I'm stupid and can only say hello :(\r\n";
+            $client->write($response);
+            echo "\n".'[response]: ' . $response;
         }
     }
 }

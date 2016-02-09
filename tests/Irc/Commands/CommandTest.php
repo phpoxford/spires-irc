@@ -42,23 +42,23 @@ class CommandTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @covers \PHPOxford\SpiresIrc\Irc\Commands\Command::raw
+     * @covers \PHPOxford\SpiresIrc\Irc\Commands\Command::__toString
      */
-    public function can_get_the_raw_command_without_params()
+    public function can_cast_to_string_without_params()
     {
         $command = new Command('QUIT');
 
-        assertThat($command->raw(), is(identicalTo('QUIT')));
+        assertThat((string) $command, is(identicalTo('QUIT')));
     }
 
     /**
      * @test
-     * @covers \PHPOxford\SpiresIrc\Irc\Commands\Command::raw
+     * @covers \PHPOxford\SpiresIrc\Irc\Commands\Command::__toString
      */
-    public function can_get_the_raw_command_with_params()
+    public function can_cast_to_string_with_params()
     {
         $command = new Command('USER', 'guest 0 * :Ronnie Reagan');
 
-        assertThat($command->raw(), is(identicalTo('USER guest 0 * :Ronnie Reagan')));
+        assertThat((string) $command, is(identicalTo('USER guest 0 * :Ronnie Reagan')));
     }
 }

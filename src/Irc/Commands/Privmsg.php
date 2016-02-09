@@ -2,50 +2,53 @@
 
 namespace PHPOxford\SpiresIrc\Irc\Commands;
 
-class Privmsg extends Command
+use PHPOxford\SpiresIrc\Irc\Message\Command as CommandInterface;
+
+class Privmsg extends Base implements CommandInterface
 {
     /**
      * @var string
      */
-    private $target;
+    protected $command = 'PRIVMSG';
+
+    /**
+     * @var array
+     */
+    private $targets;
 
     /**
      * @var string
      */
     private $text;
 
-    public function __construct(string $params = null)
+    public function __construct(array $targets, string $text)
     {
-        parent::__construct('PRIVMSG', $params);
-
-        list($target, $text) = explode(' ', $params, 2);
-
-        $this->target = $target;
-        $this->text = ltrim($text, ':');
+        $this->targets = $targets;
+        $this->text = $text;
     }
 
-    public function command() : string
+    public static function fromParams(string $params) : self
     {
-        return $this->command;
+        list($targets, $text) = explode(' ', $params, 2);
+
+        $targets = explode(',', $targets);
+        $text = ltrim($text, ':');
+
+        return new static($targets, $text);
     }
 
-    public function params() : string
+    public function targets() : array
     {
-        return $this->params;
-    }
-
-    public function raw() : string
-    {
-        return trim($this->command() . ' ' . $this->params());
-    }
-
-    public function target() : string
-    {
-        return $this->target;
+        return $this->targets;
     }
 
     public function text()
     {
         return $this->text;
+    }
+
+    public function params() : string
+    {
+        return implode(',', $this->targets) .  ' :' . $this->text;
     }
 }

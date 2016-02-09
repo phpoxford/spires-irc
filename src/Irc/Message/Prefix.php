@@ -7,11 +7,6 @@ class Prefix
     /**
      * @var string
      */
-    private $raw;
-
-    /**
-     * @var string
-     */
     private $nickname;
 
     /**

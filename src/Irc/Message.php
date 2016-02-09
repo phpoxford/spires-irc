@@ -35,6 +35,6 @@ class Message
 
     public function raw()
     {
-        return trim($this->prefix->raw() . ' ' . $this->command->raw());
+        return trim($this->prefix->raw() . ' ' . (string) $this->command);
     }
 }
