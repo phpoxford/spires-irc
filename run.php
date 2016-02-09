@@ -1,12 +1,10 @@
 <?php
 
-use PHPOxford\SpiresIrc\Irc\Commands\Command;
 use PHPOxford\SpiresIrc\Irc\Commands\Ping;
 use PHPOxford\SpiresIrc\Irc\Commands\Pong;
 use PHPOxford\SpiresIrc\Irc\Commands\Privmsg;
 use PHPOxford\SpiresIrc\Irc\Connection;
 use PHPOxford\SpiresIrc\Irc\Message;
-use PHPOxford\SpiresIrc\Irc\Message\Prefix;
 use PHPOxford\SpiresIrc\Irc\User;
 use PHPOxford\SpiresIrc\IrcClient;
 
@@ -22,7 +20,8 @@ ob_implicit_flush();
 
 $client = new IrcClient(
     new Connection(
-        '##martinsbottesting',
+        '#phpoxford',
+//        '##martinsbottesting',
         'irc.freenode.com'
     ),
     new User(
@@ -34,109 +33,53 @@ $client = new IrcClient(
 
 $client->connect();
 
-$parser = new \PHPOxford\SpiresIrc\Irc\Parser();
-
-while ($raw = $client->read()) {
-
-    if (!$raw = trim($raw)) {
-        continue;
+// Ping Pong
+$client->addAction(function (IrcClient $client, Message $message) {
+    if ($message->command() instanceof Ping) {
+        $response = Pong::fromParams($message->command()->params());
+        $client->write($response);
     }
-    echo "\n\n";
-    echo "Raw: {$raw}";
-    echo "\n";
-    $message = $parser->parse($raw . "\r\n");
-    var_export($message);
+});
 
-    $prefix = new Prefix($message['nickname'], $message['username'], $message['hostname'], $message['servername']);
+// (hi|hello|hey) spires
+$client->addAction(function (IrcClient $client, Message $message) {
+    if ($message->command() instanceof Privmsg) {
 
-    switch ($message['command']) {
-        case 'PING':
-            $message = new Message(
-                $prefix,
-                Ping::fromParams($message['params'])
-            );
-            break;
+        /** @var Privmsg $command */
+        $command = $message->command();
 
-        case 'PRIVMSG':
-            $message = new Message(
-                $prefix,
-                Privmsg::fromParams($message['params'])
-            );
-            break;
-
-        default:
-            $message = new Message(
-                $prefix,
-                new Command($message['command'], $message['params'])
-            );
-    }
-    echo "\n";
-    var_dump($message);
-
-
-    if ($message instanceof Ping) {
-        $response = Pong::fromParams($message['params']);
-        $client->write($response . "\r\n");
-        echo "\n".'[response]: ' . $response;
-    }
-
-    if ($message instanceof Privmsg) {
-//        list($target, $msg) = explode(' :', $message['params'], 2);
-
-        if (in_array($client->connection()->channel(), $message->targets()) && strpos($message->text(), "hi spires") === 0) {
-            $response = "PRIVMSG {$client->connection()->channel()} :Hello {$message->prefix()->nickname()}\r\n";
-            $client->write($response);
-            echo "\n".'[response]: ' . $response;
-        }
-        if (in_array($client->connection()->channel(), $message->targets()) && strpos($message->text(), '!spires') !== false) {
-            $response = "PRIVMSG {$client->connection()->channel()} :Sorry {$message->prefix()->nickname()}, I'm stupid and can only say hello :(\r\n";
-            $client->write($response);
-            echo "\n".'[response]: ' . $response;
+        if ($command->hasTarget($client->channel())) {
+            if (preg_match('/^(hi|hello|hey) spires$/i', $command->text())) {
+                $response = new Privmsg([$client->channel()], "Hello {$message->prefix()->nickname()}");
+                $client->write($response);
+            }
         }
     }
-}
+});
 
+// !spires what time is it?
+$client->addAction(function (IrcClient $client, Message $message) {
+    if ($message->command() instanceof Privmsg) {
+        /** @var Privmsg $command */
+        $command = $message->command();
 
+        if ($command->hasTarget($client->channel())) {
+            if (preg_match('/^!spires (?P<match>.+)/i', $command->text(), $matches)) {
+                if (preg_match('/^what time is it\??/i', $matches['match'])) {
+                    $client->write(new Privmsg([$client->channel()], "It's"));
+                    $dancer = '     \o/';
+                    foreach ([1,2,3] as $i) {
+                        usleep(1000000/$i);
+                        $client->write(new Privmsg([$client->channel()], substr($dancer, -1*$i, $i)));
+                        $dancer = $dancer == '     \o/' ? '     /o\\' : '     \o/';
+                    }
+                    ++$i;
+                    usleep(1000000/$i);
+                    $client->write(new Privmsg([$client->channel()], substr($dancer, -1*$i, $i) . " HAMMER TIME!"));
+                }
+            }
+        }
+    }
+});
 
-
-//// Edit these settings
-//$chan = "#php";
-//$server = "127.0.0.1";
-//$port = 6667;
-//$nick = "PHP_Bot";
-//
-//// STOP EDITTING NOW.
-//$socket = fsockopen("$server", $port);
-//fputs($socket,"USER $nick $nick $nick $nick :$nick\n");
-//fputs($socket,"NICK $nick\n");
-//fputs($socket,"JOIN ".$chan."\n");
-//
-//while(1) {
-//    while($data = fgets($socket)) {
-//        echo nl2br($data);
-//        flush();
-//
-//        $ex = explode(' ', $data);
-//        $rawcmd = explode(':', $ex[3]);
-//        $oneword = explode('<br>', $rawcmd);
-//        $channel = $ex[2];
-//        $nicka = explode('@', $ex[0]);
-//        $nickb = explode('!', $nicka[0]);
-//        $nickc = explode(':', $nickb[0]);
-//
-//        $host = $nicka[1];
-//        $nick = $nickc[1];
-//        if($ex[0] == "PING"){
-//            fputs($socket, "PONG ".$ex[1]."\n");
-//        }
-//
-//        $args = NULL; for ($i = 4; $i < count($ex); $i++) { $args .= $ex[$i] . ' '; }
-//
-//        if ($rawcmd[1] == "!sayit") {
-//            fputs($socket, "PRIVMSG ".$channel." :".$args." \n");
-//        }
-//        elseif ($rawcmd[1] == "!md5") {
-//            fputs($socket, "PRIVMSG ".$channel." :MD5 ".md5($args)."\n");
-//        }
-//    }
-//}
+$client->run();

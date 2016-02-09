@@ -51,4 +51,9 @@ class Privmsg extends Base implements CommandInterface
     {
         return implode(',', $this->targets) .  ' :' . $this->text;
     }
+
+    public function hasTarget($target)
+    {
+        return in_array($target, $this->targets());
+    }
 }
