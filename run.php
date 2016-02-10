@@ -7,6 +7,7 @@ use PHPOxford\SpiresIrc\IrcClient;
 use PHPOxford\SpiresIrc\Plugins\Greetings;
 use PHPOxford\SpiresIrc\Plugins\PingPong;
 use PHPOxford\SpiresIrc\Plugins\Time;
+use PHPOxford\SpiresIrc\Plugins\Welcome;
 
 require_once 'vendor/autoload.php';
 
@@ -36,6 +37,9 @@ $client->connect();
 
 // Ping Pong
 $client->addPlugin(new PingPong());
+
+// Welcome users
+$client->addPlugin(new Welcome());
 
 // (hi|hello|hey) spires
 $client->addPlugin(new Greetings());

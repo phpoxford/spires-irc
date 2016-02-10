@@ -3,6 +3,7 @@
 namespace PHPOxford\SpiresIrc;
 
 use PHPOxford\SpiresIrc\Irc\Commands\Command;
+use PHPOxford\SpiresIrc\Irc\Commands\Join;
 use PHPOxford\SpiresIrc\Irc\Commands\Ping;
 use PHPOxford\SpiresIrc\Irc\Commands\Privmsg;
 use PHPOxford\SpiresIrc\Irc\Connection;
@@ -133,6 +134,13 @@ class IrcClient
                     $message = new Message(
                         $prefix,
                         Ping::fromParams($message['params'])
+                    );
+                    break;
+
+                case 'JOIN':
+                    $message = new Message(
+                        $prefix,
+                        Join::fromParams($message['params'])
                     );
                     break;
 
