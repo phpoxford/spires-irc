@@ -51,5 +51,4 @@ class Pong extends Base implements CommandInterface
     {
         return trim($this->server .  ' ' . $this->server2);
     }
-
 }

@@ -24,8 +24,12 @@ class Prefix
      */
     private $servername;
 
-    public function __construct(string $nickname = null, string $username = null, string $hostname = null, string $servername = '')
-    {
+    public function __construct(
+        string $nickname = null,
+        string $username = null,
+        string $hostname = null,
+        string $servername = ''
+    ) {
         $this->nickname = $nickname ?: '';
         $this->username = $username ?: '';
         $this->hostname = $hostname ?: '';

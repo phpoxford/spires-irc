@@ -31,5 +31,4 @@ class Command extends Base implements CommandInterface
     {
         return $this->params;
     }
-
 }

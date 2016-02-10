@@ -59,15 +59,16 @@ class IrcClient
     public function connect()
     {
         $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+
         $isConnected = socket_connect(
             $this->socket,
             $this->connection()->server(),
             $this->connection()->port()
         );
 
-        socket_write($this->socket, "NICK {$this->user()->nickname()}\r\n");
-        socket_write($this->socket, "USER {$this->user()->username()} {$this->user()->usermode()} * :{$this->user()->realname()}\r\n");
-        socket_write($this->socket, "JOIN {$this->connection()->channel()}\r\n");
+        $this->write("NICK {$this->user()->nickname()}\r\n");
+        $this->write("USER {$this->user()->username()} {$this->user()->usermode()} * :{$this->user()->realname()}\r\n");
+        $this->write("JOIN {$this->connection()->channel()}\r\n");
     }
 
     public function addAction($callback)
@@ -110,7 +111,12 @@ class IrcClient
             $this->debug("\n\n[ read  ]: " . $raw);
             $message = $parser->parse($raw . "\r\n");
 
-            $prefix = new Prefix($message['nickname'], $message['username'], $message['hostname'], $message['servername']);
+            $prefix = new Prefix(
+                $message['nickname'],
+                $message['username'],
+                $message['hostname'],
+                $message['servername']
+            );
 
             switch ($message['command']) {
                 case 'PING':
