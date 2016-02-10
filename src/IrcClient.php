@@ -28,6 +28,11 @@ class IrcClient
      */
     private $actions = [];
 
+    /**
+     * @var Plugin[]
+     */
+    private $plugins = [];
+
     private $socket;
 
     public function __construct(Connection $connection, User $user)
@@ -74,6 +79,11 @@ class IrcClient
     public function addAction($callback)
     {
         $this->actions[] = $callback;
+    }
+
+    public function addPlugin(Plugin $plugin)
+    {
+        $this->plugins[] = $plugin;
     }
 
     public function read()
@@ -146,6 +156,10 @@ class IrcClient
             ob_end_clean();
             $this->debug("\n" . $messageDump);
 
+
+            foreach ($this->plugins as $plugin) {
+                $plugin->handle($this, $message);
+            }
 
             foreach ($this->actions as $action) {
                 $action($this, $message);

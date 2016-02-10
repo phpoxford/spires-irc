@@ -1,12 +1,12 @@
 <?php
 
-use PHPOxford\SpiresIrc\Irc\Commands\Ping;
-use PHPOxford\SpiresIrc\Irc\Commands\Pong;
-use PHPOxford\SpiresIrc\Irc\Commands\Privmsg;
 use PHPOxford\SpiresIrc\Irc\Connection;
 use PHPOxford\SpiresIrc\Irc\Message;
 use PHPOxford\SpiresIrc\Irc\User;
 use PHPOxford\SpiresIrc\IrcClient;
+use PHPOxford\SpiresIrc\Plugins\Greetings;
+use PHPOxford\SpiresIrc\Plugins\PingPong;
+use PHPOxford\SpiresIrc\Plugins\Time;
 
 require_once 'vendor/autoload.php';
 
@@ -33,45 +33,15 @@ $client = new IrcClient(
 
 $client->connect();
 
+
 // Ping Pong
-$client->addAction(function (IrcClient $client, Message $message) {
-    if ($message->command() instanceof Ping) {
-        $response = Pong::fromParams($message->command()->params());
-        $client->write($response);
-    }
-});
+$client->addPlugin(new PingPong());
 
 // (hi|hello|hey) spires
-$client->addAction(function (IrcClient $client, Message $message) {
-    if ($message->command() instanceof Privmsg) {
-        /** @var Privmsg $command */
-        $command = $message->command();
-
-        if ($command->hasTarget($client->channel())) {
-            if (preg_match('/^(hi|hello|hey) spires$/i', $command->text())) {
-                $client->channelMessage("Hello {$message->prefix()->nickname()}");
-            }
-        }
-    }
-});
+$client->addPlugin(new Greetings());
 
 // !spires what time is it?
-$client->addAction(function (IrcClient $client, Message $message) {
-    if ($message->command() instanceof Privmsg) {
-        /** @var Privmsg $command */
-        $command = $message->command();
+$client->addPlugin(new Time());
 
-        if ($command->hasTarget($client->channel())) {
-            if (preg_match('/^!spires (?P<match>.+)/i', $command->text(), $matches)) {
-                if (preg_match('/^what time is it\??/i', $matches['match'])) {
-                    $time = date('H:i');
-                    $client->channelMessage(" \\o/  /       {$time}       \\");
-                    $client->channelMessage("  |   \\ It's hammer time! /");
-                    $client->channelMessage(" / \\");
-                }
-            }
-        }
-    }
-});
 
 $client->run();
