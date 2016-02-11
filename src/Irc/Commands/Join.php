@@ -28,7 +28,6 @@ class Join extends Base implements CommandInterface
         $this->keys = $keys ?? [];
     }
 
-    // ( <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] ) / "0"
     public static function fromParams(string $params) : self
     {
         $arguments = explode(' ', $params);
