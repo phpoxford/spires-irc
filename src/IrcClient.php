@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace PHPOxford\SpiresIrc;
 
@@ -107,7 +108,7 @@ class IrcClient
 
     public function channelMessage(string $message)
     {
-        $this->write(new Privmsg([$this->channel()], $message));
+        $this->write((string) new Privmsg([$this->channel()], $message));
     }
 
     public function run()

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 use PHPOxford\SpiresIrc\Irc\Connection;
 use PHPOxford\SpiresIrc\Irc\Message;

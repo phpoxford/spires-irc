@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace PHPOxford\SpiresIrc\Plugins;
 
@@ -13,8 +14,7 @@ class PingPong implements Plugin
     public function handle(IrcClient $client, Message $message)
     {
         if ($message->command() instanceof Ping) {
-            $response = Pong::fromParams($message->command()->params());
-            $client->write($response);
+            $client->write((string) Pong::fromParams($message->command()->params()));
         }
     }
 }
